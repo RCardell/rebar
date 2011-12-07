@@ -7,8 +7,6 @@ RUNNER_SCRIPT_DIR=$(cd ${0%/*} && pwd)
 RUNNER_BASE_DIR=${RUNNER_SCRIPT_DIR%/*}
 RUNNER_ETC_DIR=$RUNNER_BASE_DIR/etc
 RUNNER_LOG_DIR=$RUNNER_BASE_DIR/log
-# Note the trailing slash on $PIPE_DIR/
-PIPE_DIR=/tmp/$RUNNER_BASE_DIR/
 RUNNER_USER=
 
 # Make sure this script is running as the appropriate user
@@ -49,13 +47,12 @@ if [ -z "$NAME_ARG" ]; then
     echo "vm.args needs to have either -name or -sname parameter."
     exit 1
 fi
+# Extract the node name of the remote node
+NAME=${NAME_ARG#* }
+REAL_NAME=$NAME"@"`hostname -s`
 
-# Extract the target cookie
+# Extract the target cookie - may not exist
 COOKIE_ARG=`grep '^-setcookie' $VMARGS_PATH`
-if [ -z "$COOKIE_ARG" ]; then
-    echo "vm.args needs to have a -setcookie parameter."
-    exit 1
-fi
 
 # Add ERTS bin dir to our path
 ERTS_PATH=$RUNNER_BASE_DIR/erts-$ERTS_VSN/bin
@@ -74,9 +71,8 @@ case "$1" in
         fi
         HEART_COMMAND="$RUNNER_BASE_DIR/bin/$SCRIPT start"
         export HEART_COMMAND
-        mkdir -p $PIPE_DIR
         shift # remove $1
-        $ERTS_PATH/run_erl -daemon $PIPE_DIR $RUNNER_LOG_DIR "exec $RUNNER_BASE_DIR/bin/$SCRIPT console $@" 2>&1
+        $ERTS_PATH/erl -sname $NAME -detached
         ;;
 
     stop)
@@ -145,7 +141,7 @@ case "$1" in
         fi
 
         shift
-        exec $ERTS_PATH/to_erl $PIPE_DIR
+        exec $ERTS_PATH/erl -sname $$ -remsh $NAME
         ;;
 
     console|console_clean)
