@@ -42,15 +42,24 @@ else
 fi
 
 # Extract the target node name from node.args
-NAME_ARG=`egrep '^-s?name' $VMARGS_PATH`
+NAME_ARG=`egrep '^-sname' $VMARGS_PATH`
 if [ -z "$NAME_ARG" ]; then
-    echo "vm.args needs to have either -name or -sname parameter."
+    echo "vm.args needs to have a '-sname' parameter. '-name' is not supported."
     exit 1
 fi
+
 # Extract the node name of the remote node
 NAME=${NAME_ARG#* }
-REAL_NAME=$NAME"@"`hostname -s`
-
+HOSTNAME=`hostname -s`
+# Add hostname unless it is already added
+case "$NAME" in
+  *@*)
+        REAL_NAME=$NAME
+        ;;
+    *)
+        REAL_NAME=$NAME"@"$HOSTNAME
+esac
+REAL_NAME_ARG="-sname "$REAL_NAME
 # Extract the target cookie - may not exist
 COOKIE_ARG=`grep '^-setcookie' $VMARGS_PATH`
 
@@ -58,7 +67,7 @@ COOKIE_ARG=`grep '^-setcookie' $VMARGS_PATH`
 ERTS_PATH=$RUNNER_BASE_DIR/erts-$ERTS_VSN/bin
 
 # Setup command to control the node
-NODETOOL="$ERTS_PATH/escript $ERTS_PATH/nodetool $NAME_ARG $COOKIE_ARG"
+NODETOOL="$ERTS_PATH/escript $ERTS_PATH/nodetool $REAL_NAME_ARG $COOKIE_ARG"
 
 # Check the first argument for instructions
 case "$1" in
@@ -72,7 +81,7 @@ case "$1" in
         HEART_COMMAND="$RUNNER_BASE_DIR/bin/$SCRIPT start"
         export HEART_COMMAND
         shift # remove $1
-        $ERTS_PATH/erl -sname $NAME -detached
+        $ERTS_PATH/erl $REAL_NAME_ARG -detached
         ;;
 
     stop)
@@ -139,9 +148,8 @@ case "$1" in
             echo "Node is not running!"
             exit $ES
         fi
-
         shift
-        exec $ERTS_PATH/erl -sname $$ -remsh $NAME
+        exec $ERTS_PATH/erl -sname $$@$HOSTNAME -remsh $REAL_NAME
         ;;
 
     console|console_clean)
