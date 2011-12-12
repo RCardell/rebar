@@ -1,8 +1,8 @@
 ## Name of the node
--name {{nodeid}}@127.0.0.1
+-sname {{nodeid}}
 
-## Cookie for distributed erlang
--setcookie {{nodeid}}
+## Cookie for distributed erlang. Uncommented for use of .erlang.cookie 
+## -setcookie {{nodeid}}
 
 ## Heartbeat management; auto-restarts VM if it dies or becomes unresponsive
 ## (Disabled by default..use with caution!)
