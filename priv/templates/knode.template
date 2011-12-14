@@ -1,0 +1,18 @@
+{variables, [{nodeid, "knode"}]}.
+{template, "knode.gitignore", "./.gitignore"}.
+{template, "knode_Makefile", "./Makefile"}.
+{template, "knode_reltool.config", "rel/reltool.config"}.
+{file, "knode_erl.script", "rel/files/erl"}.
+{chmod, 8#744, "rel/files/erl"}.
+{file, "knode_nodetool", "rel/files/nodetool"}.
+{chmod, 8#744, "rel/files/nodetool"}.
+{file, "knode.runner", "rel/files/{{nodeid}}"}.
+{chmod, 8#744, "rel/files/{{nodeid}}"}.
+{file, "knode_sys.config", "rel/files/sys.config"}.
+{template, "knode_vm.args", "rel/files/vm.args"}.
+{template, "knode_rebar.config", "config/rebar.config"}.
+{template, "knode_upgrade.config", "rel/files/upgrade.config"}.
+{file, "knode_upgrade.erl", "rel/files/upgrade.erl"}.
+
+{dir, "lib"}.
+{dir, "bin"}.

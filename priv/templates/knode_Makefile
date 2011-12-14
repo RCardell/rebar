@@ -1,0 +1,35 @@
+REBAR=./build_tools/rebar/rebar --config config/rebar.config
+REL_NAME={{nodeid}}
+
+all:
+	$(REBAR) compile
+
+.PHONY: init
+init:	update_git_submodules
+	@cd build_tools && $(MAKE)
+	$(REBAR) get-deps
+	$(REBAR) compile
+
+.PHONY: clean
+clean:
+	$(REBAR) clean
+	@cd build_tools; $(MAKE) clean
+
+.PHONY: release
+release:
+	$(REBAR) generate -f
+	@cd rel && tar -czf $(REL_NAME).tar.gz ./$(REL_NAME)
+	@cd rel && cp $(REL_NAME)/ $(REL_NAME)_last -r
+
+.PHONY: update_git_submodules
+update_git_submodules:
+	@-git submodule init
+	@-git submodule update
+
+.PHONY: upgrade_release
+upgrade_release: release
+	$(REBAR) generate-upgrade previous_release=$(REL_NAME)_last
+
+.PHONY: appup
+appup:
+	$(REBAR) generate-appups previous_release=$(PREV_REL)

@@ -1,0 +1,8 @@
+*.beam
+*~
+*.orig
+.*.swp
+rt.work
+.hgignore
+.eunit
+lib/

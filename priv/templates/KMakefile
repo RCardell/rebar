@@ -1,0 +1,12 @@
+REBAR=./build_tools/rebar/rebar --config rebar.config
+
+all:
+	$(REBAR) compile
+
+.PHONY: init
+init:	$(REBAR) get-deps
+	$(REBAR) compile
+
+.PHONY: clean
+clean:
+	$(REBAR) clean
